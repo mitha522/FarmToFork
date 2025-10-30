@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>View Product | Farm to Fork</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6fff6;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    #result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌾 Farm to Fork - Product Details</h1>
+  <p id="status">⏳ Connecting to blockchain...</p>
+  <div id="result"></div>
+
+  <script>
+    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86";
+
+    const contractABI = [
+      {
+        "inputs": [{"internalType":"uint256","name":"_id","type":"uint256"}],
+        "name":"getItem",
+        "outputs":[
+          {"internalType":"uint256","name":"id","type":"uint256"},
+          {"internalType":"string","name":"name","type":"string"},
+          {"internalType":"string","name":"farm","type":"string"},
+          {"internalType":"string","name":"transport","type":"string"},
+          {"internalType":"string","name":"warehouse","type":"string"},
+          {"internalType":"string","name":"retail","type":"string"},
+          {"internalType":"address","name":"owner","type":"address"}
+        ],
+        "stateMutability":"view",
+        "type":"function"
+      }
+    ];
+
+    async function loadProduct() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
+      if (!id) {
+        document.getElementById("status").innerText = "❌ Invalid or missing product ID in link.";
+        return;
+      }
+
+      if (typeof window.ethereum === "undefined") {
+        document.getElementById("status").innerText = "❌ Please install MetaMask to view details.";
+        return;
+      }
+
+      try {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        const data = await contract.methods.getItem(id).call();
+        document.getElementById("status").innerText = "✅ Product Found!";
+
+        document.getElementById("result").innerHTML = `
+          <h3>📦 Product ID: ${data.id}</h3>
+          <p><b>🧺 Name:</b> ${data.name}</p>
+          <p><b>🌾 Farm:</b> ${data.farm}</p>
+          <p><b>🚚 Transport:</b> ${data.transport}</p>
+          <p><b>🏬 Warehouse:</b> ${data.warehouse}</p>
+          <p><b>🛒 Retail:</b> ${data.retail}</p>
+          <p><b>👤 Owner:</b> ${data.owner}</p>
+        `;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "❌ Product not found or blockchain not connected.";
+      }
+    }
+
+    loadProduct();
+  </script>
+</body>
+</html>

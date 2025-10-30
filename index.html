@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Farm to Fork Food Traceability</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- ✅ Import Web3.js -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+</head>
+<body>
+  <h1>🌾 Farm to Fork Traceability</h1>
+
+  <!-- Connect -->
+  <button id="connectBtn">🔗 Connect MetaMask</button>
+  <div id="result"></div>
+
+  <hr>
+
+  <!-- Add Product Section -->
+  <h2>Add Farm Product</h2>
+  <input type="number" id="productId" placeholder="Enter Product ID">
+  <input type="text" id="productName" placeholder="Enter Product Name">
+  <input type="text" id="farmDetails" placeholder="Enter Farm Details">
+  <button id="addProductBtn">Add Product</button>
+
+  <hr>
+
+  <!-- Update Transport -->
+  <h2>Update Transport Stage</h2>
+  <input type="number" id="transId" placeholder="Enter Product ID">
+  <input type="text" id="transDetails" placeholder="Enter Transport Details">
+  <button id="updateTransportBtn">Update Transport</button>
+
+  <hr>
+
+  <!-- Update Warehouse -->
+  <h2>Update Warehouse Stage</h2>
+  <input type="number" id="wareId" placeholder="Enter Product ID">
+  <input type="text" id="wareDetails" placeholder="Enter Warehouse Details">
+  <button id="updateWarehouseBtn">Update Warehouse</button>
+
+  <hr>
+
+  <!-- Update Retail -->
+  <h2>Update Retail Stage</h2>
+  <input type="number" id="retailId" placeholder="Enter Product ID">
+  <input type="text" id="retailDetails" placeholder="Enter Retail Details">
+  <button id="updateRetailBtn">Update Retail</button>
+
+  <hr>
+
+  <!-- View Record -->
+  <h2>View Product Record</h2>
+  <input type="number" id="viewId" placeholder="Enter Product ID">
+  <button id="viewBtn">View Record</button>
+  <pre id="viewResult"></pre>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>

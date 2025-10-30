@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Generator | Farm to Fork</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+  <style>
+    body { text-align:center; font-family:Arial; padding:50px; background:#f0fff0; }
+    #qrcode { margin-top:20px; }
+  </style>
+</head>
+<body>
+  <h1>Generate Product QR Code 🌾</h1>
+  <input type="text" id="productId" placeholder="Enter Product ID (e.g., 1)">
+  <button onclick="generateQR()">Generate</button>
+
+  <div id="qrcode"></div>
+
+  <script>
+    function generateQR() {
+      const id = document.getElementById("productId").value;
+      const url = `http://127.0.0.1:5500/view.html?id=${id}`;
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), url);
+    }
+  </script>
+</body>
+</html>
