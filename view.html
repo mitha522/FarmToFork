@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>🌾 Farm to Fork - TraceVeda Product Viewer</title>
+  <title>🌾 TraceVeda | Farm to Fork Product Viewer</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background: #f6fff6;
-      color: #333;
+      color: #222;
       text-align: center;
       padding: 40px;
     }
@@ -15,22 +15,32 @@
       margin: 10px;
       padding: 10px;
       font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #008C45;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00713a;
     }
     #result {
       margin-top: 30px;
       padding: 20px;
-      background: #fff;
+      background: white;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: inline-block;
       text-align: left;
-      min-width: 300px;
+      min-width: 320px;
     }
   </style>
 </head>
 <body>
-  <h1>🌾 TraceVeda | Farm to Fork Product Viewer</h1>
-  <p id="status">🔗 Connects to blockchain automatically via MetaMask (Sepolia Network)</p>
+  <h1>🌾 TraceVeda | Farm-to-Fork Transparency</h1>
+  <p id="status">🔗 Connected to Sepolia Blockchain (Read-Only Mode)</p>
 
   <input type="number" id="productId" placeholder="Enter Product ID">
   <button id="viewBtn">View Product Details</button>
@@ -38,7 +48,12 @@
   <div id="result"></div>
 
   <script>
-    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86"; // your deployed address
+    // --- Your Sepolia Infura endpoint ---
+    const INFURA_URL = "https://sepolia.infura.io/v3/c3546a0967414f689a87e419e9a171c4";
+    const web3 = new Web3(new Web3.providers.HttpProvider(INFURA_URL));
+
+    // --- Smart Contract details ---
+    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86";
 
     const contractABI = [
       {
@@ -58,6 +73,8 @@
       }
     ];
 
+    const contract = new web3.eth.Contract(contractABI, contractAddress);
+
     async function viewProduct() {
       const id = document.getElementById("productId").value;
       if (!id) {
@@ -65,18 +82,9 @@
         return;
       }
 
-      if (typeof window.ethereum === "undefined") {
-        document.getElementById("status").innerText = "❌ Please install MetaMask to view details.";
-        return;
-      }
-
       try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(contractABI, contractAddress);
-
         const data = await contract.methods.getItem(id).call();
-        document.getElementById("status").innerText = "✅ Product Found on Blockchain!";
+        document.getElementById("status").innerText = "✅ Product Found!";
         document.getElementById("result").innerHTML = `
           <h3>📦 Product ID: ${data.id}</h3>
           <p><b>🧺 Name:</b> ${data.name}</p>
@@ -84,18 +92,18 @@
           <p><b>🚚 Transport:</b> ${data.transport}</p>
           <p><b>🏬 Warehouse:</b> ${data.warehouse}</p>
           <p><b>🛒 Retail:</b> ${data.retail}</p>
-          <p><b>👤 Owner:</b> TraceVeda</p>
+          <p><b>👤 Verified by:</b> TraceVeda</p>
         `;
       } catch (err) {
         console.error(err);
-        document.getElementById("status").innerText = "❌ Product not found or blockchain not connected.";
+        document.getElementById("status").innerText = "❌ Product not found on blockchain.";
       }
     }
 
     document.getElementById("viewBtn").addEventListener("click", viewProduct);
   </script>
 
-  <footer style="margin-top: 40px; font-size: 14px;">
+  <footer style="margin-top:40px; font-size:14px; color:#555;">
     🔗 Powered by TraceVeda | Farm-to-Fork Blockchain (Sepolia Network)
   </footer>
 </body>
