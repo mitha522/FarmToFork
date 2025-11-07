@@ -1,62 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>🌾 Farm to Fork - Product Viewer</title>
+  <title>🌾 Farm to Fork - Product Details</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4fff4;
+      background: #f0fff0;
+      color: #222;
       text-align: center;
       padding: 40px;
-      color: #333;
-    }
-    input {
-      padding: 10px;
-      width: 250px;
-      margin: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #45a049;
     }
     #result {
       margin-top: 30px;
-      background: #fff;
       padding: 20px;
-      border-radius: 10px;
+      background: white;
+      border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: inline-block;
       text-align: left;
     }
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-  <h1>🌾 Farm to Fork - Product Details Viewer</h1>
-  <p id="status">🔗 Connect MetaMask to fetch data</p>
-
-  <!-- Input to Enter Product ID -->
-  <input type="number" id="productIdInput" placeholder="Enter Product ID">
-  <button id="fetchBtn">View Product</button>
-
+  <h1>🌾 Farm to Fork - Product Details</h1>
+  <p id="status">⏳ Loading product details from blockchain...</p>
   <div id="result"></div>
 
-  <p style="margin-top:40px; color:gray;">
-    🔗 Powered by <b>ResQChain</b> | Madhu’s Farm-to-Fork Blockchain (Sepolia)
-  </p>
+  <footer>🔗 Powered by <b>ResQChain</b> | Madhu’s Farm-to-Fork Blockchain (Sepolia)</footer>
 
   <script>
-    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86"; // ✅ your deployed contract
+    // ✅ Infura endpoint (read-only access)
+    const infuraURL = "https://sepolia.infura.io/v3/c3546a0967414f689a87e419e9a171c4";
+
+    // ✅ Your deployed contract address
+    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86";
+
+    // ✅ Contract ABI (only getItem function needed)
     const contractABI = [
       {
         "inputs": [{"internalType":"uint256","name":"_id","type":"uint256"}],
@@ -75,29 +60,24 @@
       }
     ];
 
-    let web3, contract;
+    async function loadProduct() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
 
-    async function init() {
-      if (typeof window.ethereum === "undefined") {
-        document.getElementById("status").innerText = "❌ Please install MetaMask to view details.";
-        return;
-      }
-
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      web3 = new Web3(window.ethereum);
-      contract = new web3.eth.Contract(contractABI, contractAddress);
-      document.getElementById("status").innerText = "✅ Connected to Blockchain (Sepolia)";
-    }
-
-    async function fetchProduct() {
-      const id = document.getElementById("productIdInput").value;
       if (!id) {
-        alert("Please enter a Product ID!");
+        document.getElementById("status").innerText = "❌ Invalid or missing product ID in link.";
         return;
       }
 
       try {
+        // Connect directly to blockchain using Infura (no MetaMask)
+        const web3 = new Web3(new Web3.providers.HttpProvider(infuraURL));
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Fetch product details
         const data = await contract.methods.getItem(id).call();
+        document.getElementById("status").innerText = "✅ Product Found!";
+
         document.getElementById("result").innerHTML = `
           <h3>📦 Product ID: ${data.id}</h3>
           <p><b>🧺 Name:</b> ${data.name}</p>
@@ -105,17 +85,17 @@
           <p><b>🚚 Transport:</b> ${data.transport}</p>
           <p><b>🏬 Warehouse:</b> ${data.warehouse}</p>
           <p><b>🛒 Retail:</b> ${data.retail}</p>
-          <p><b>👤 Owner:</b> ${data.owner}</p>
+          <p><b>👤 Owner Address:</b> ${data.owner}</p>
         `;
       } catch (err) {
         console.error(err);
-        document.getElementById("result").innerHTML = "❌ Product not found or blockchain not connected.";
+        document.getElementById("status").innerText =
+          "❌ Product not found or blockchain connection failed.";
       }
     }
 
-    document.getElementById("fetchBtn").addEventListener("click", fetchProduct);
-
-    init();
+    loadProduct();
   </script>
 </body>
 </html>
+
