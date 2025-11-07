@@ -1,20 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>View Product | Farm to Fork</title>
+  <meta charset="UTF-8">
+  <title>🌾 Farm to Fork - Product Viewer</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f6fff6;
-      color: #333;
+      background: #f4fff4;
       text-align: center;
       padding: 40px;
+      color: #333;
+    }
+    input {
+      padding: 10px;
+      width: 250px;
+      margin: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
     }
     #result {
       margin-top: 30px;
-      padding: 20px;
       background: #fff;
+      padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: inline-block;
@@ -23,13 +42,21 @@
   </style>
 </head>
 <body>
-  <h1>🌾 Farm to Fork - Product Details</h1>
-  <p id="status">⏳ Connecting to blockchain...</p>
+  <h1>🌾 Farm to Fork - Product Details Viewer</h1>
+  <p id="status">🔗 Connect MetaMask to fetch data</p>
+
+  <!-- Input to Enter Product ID -->
+  <input type="number" id="productIdInput" placeholder="Enter Product ID">
+  <button id="fetchBtn">View Product</button>
+
   <div id="result"></div>
 
-  <script>
-    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86";
+  <p style="margin-top:40px; color:gray;">
+    🔗 Powered by <b>ResQChain</b> | Madhu’s Farm-to-Fork Blockchain (Sepolia)
+  </p>
 
+  <script>
+    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86"; // ✅ your deployed contract
     const contractABI = [
       {
         "inputs": [{"internalType":"uint256","name":"_id","type":"uint256"}],
@@ -48,27 +75,29 @@
       }
     ];
 
-    async function loadProduct() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get("id");
-      if (!id) {
-        document.getElementById("status").innerText = "❌ Invalid or missing product ID in link.";
-        return;
-      }
+    let web3, contract;
 
+    async function init() {
       if (typeof window.ethereum === "undefined") {
         document.getElementById("status").innerText = "❌ Please install MetaMask to view details.";
         return;
       }
 
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      web3 = new Web3(window.ethereum);
+      contract = new web3.eth.Contract(contractABI, contractAddress);
+      document.getElementById("status").innerText = "✅ Connected to Blockchain (Sepolia)";
+    }
+
+    async function fetchProduct() {
+      const id = document.getElementById("productIdInput").value;
+      if (!id) {
+        alert("Please enter a Product ID!");
+        return;
+      }
+
       try {
-        await window.ethereum.request({ method: "eth_requestAccounts" });
-        const web3 = new Web3(window.ethereum);
-        const contract = new web3.eth.Contract(contractABI, contractAddress);
-
         const data = await contract.methods.getItem(id).call();
-        document.getElementById("status").innerText = "✅ Product Found!";
-
         document.getElementById("result").innerHTML = `
           <h3>📦 Product ID: ${data.id}</h3>
           <p><b>🧺 Name:</b> ${data.name}</p>
@@ -80,11 +109,13 @@
         `;
       } catch (err) {
         console.error(err);
-        document.getElementById("status").innerText = "❌ Product not found or blockchain not connected.";
+        document.getElementById("result").innerHTML = "❌ Product not found or blockchain not connected.";
       }
     }
 
-    loadProduct();
+    document.getElementById("fetchBtn").addEventListener("click", fetchProduct);
+
+    init();
   </script>
 </body>
 </html>
