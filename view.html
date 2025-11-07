@@ -1,47 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>🌾 Farm to Fork - Product Details</title>
+  <title>🌾 Farm to Fork - TraceVeda Product Viewer</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f0fff0;
-      color: #222;
+      background: #f6fff6;
+      color: #333;
       text-align: center;
       padding: 40px;
+    }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
     }
     #result {
       margin-top: 30px;
       padding: 20px;
-      background: white;
-      border-radius: 12px;
+      background: #fff;
+      border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       display: inline-block;
       text-align: left;
-    }
-    footer {
-      margin-top: 40px;
-      font-size: 14px;
-      color: #555;
+      min-width: 300px;
     }
   </style>
 </head>
 <body>
-  <h1>🌾 Farm to Fork - Product Details</h1>
-  <p id="status">⏳ Loading product details from blockchain...</p>
+  <h1>🌾 TraceVeda | Farm to Fork Product Viewer</h1>
+  <p id="status">🔗 Connects to blockchain automatically via MetaMask (Sepolia Network)</p>
+
+  <input type="number" id="productId" placeholder="Enter Product ID">
+  <button id="viewBtn">View Product Details</button>
+
   <div id="result"></div>
 
-  <footer>🔗 Powered by <b>ResQChain</b> | Madhu’s Farm-to-Fork Blockchain (Sepolia)</footer>
-
   <script>
-    // ✅ Infura endpoint (read-only access)
-    const infuraURL = "https://sepolia.infura.io/v3/c3546a0967414f689a87e419e9a171c4";
+    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86"; // your deployed address
 
-    // ✅ Your deployed contract address
-    const contractAddress = "0xf69871d0A6e217E4459585c6c5c8BBdd1Ed41b86";
-
-    // ✅ Contract ABI (only getItem function needed)
     const contractABI = [
       {
         "inputs": [{"internalType":"uint256","name":"_id","type":"uint256"}],
@@ -60,24 +58,25 @@
       }
     ];
 
-    async function loadProduct() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get("id");
-
+    async function viewProduct() {
+      const id = document.getElementById("productId").value;
       if (!id) {
-        document.getElementById("status").innerText = "❌ Invalid or missing product ID in link.";
+        alert("Please enter a Product ID!");
+        return;
+      }
+
+      if (typeof window.ethereum === "undefined") {
+        document.getElementById("status").innerText = "❌ Please install MetaMask to view details.";
         return;
       }
 
       try {
-        // Connect directly to blockchain using Infura (no MetaMask)
-        const web3 = new Web3(new Web3.providers.HttpProvider(infuraURL));
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const web3 = new Web3(window.ethereum);
         const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-        // Fetch product details
         const data = await contract.methods.getItem(id).call();
-        document.getElementById("status").innerText = "✅ Product Found!";
-
+        document.getElementById("status").innerText = "✅ Product Found on Blockchain!";
         document.getElementById("result").innerHTML = `
           <h3>📦 Product ID: ${data.id}</h3>
           <p><b>🧺 Name:</b> ${data.name}</p>
@@ -85,17 +84,20 @@
           <p><b>🚚 Transport:</b> ${data.transport}</p>
           <p><b>🏬 Warehouse:</b> ${data.warehouse}</p>
           <p><b>🛒 Retail:</b> ${data.retail}</p>
-          <p><b>👤 Owner Address:</b> ${data.owner}</p>
+          <p><b>👤 Owner:</b> TraceVeda</p>
         `;
       } catch (err) {
         console.error(err);
-        document.getElementById("status").innerText =
-          "❌ Product not found or blockchain connection failed.";
+        document.getElementById("status").innerText = "❌ Product not found or blockchain not connected.";
       }
     }
 
-    loadProduct();
+    document.getElementById("viewBtn").addEventListener("click", viewProduct);
   </script>
+
+  <footer style="margin-top: 40px; font-size: 14px;">
+    🔗 Powered by TraceVeda | Farm-to-Fork Blockchain (Sepolia Network)
+  </footer>
 </body>
 </html>
 
